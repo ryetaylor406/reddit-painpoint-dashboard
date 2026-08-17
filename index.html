@@ -137,8 +137,8 @@
 <body>
 <header>
   <h1 class="hero">Live proof that your customers are <em>already asking</em> for what you fix.</h1>
-  <div class="sub">Reddit pain-point monitor · generated 2026-08-17 13:32 · data embedded, works offline</div>
-  <div class="stakes">356 new this week · 239 posted in the last 72 hours. <span class="note">These conversations won't wait.</span></div>
+  <div class="sub">Reddit pain-point monitor · generated 2026-08-17 13:41 · data embedded, works offline</div>
+  <div class="stakes">355 new this week · 239 posted in the last 72 hours. <span class="note">These conversations won't wait.</span></div>
   <div class="stats">
     <div class="stat"><div class="num">372</div><div class="lbl">Posts</div></div>
     <div class="stat warm"><div class="num">65</div><div class="lbl">Warm leads</div></div>
@@ -162,6 +162,7 @@
     <button class="btn active" id="bWarm">Warm only</button>
     <button class="btn" id="bNew">🆕 Newest first</button>
     <button class="btn" id="bHeld">⭐ Interested</button>
+    <button class="btn" id="bDone">✉️ Contacted</button>
     <button class="btn" id="bHidden">❌ Passed</button>
     <button class="btn" id="bExpand">Expand all</button>
     <button class="btn" id="bCollapse">Collapse all</button>
@@ -196,6 +197,7 @@ try {
 const warmOnly = { on: true };
 const newestFirst = { on: false };
 const heldOnly = { on: false };
+const doneOnly = { on: false };
 const hiddenOnly = { on: false };
 
 function saveAll() {
@@ -346,6 +348,7 @@ function filteredList() {
     const isHidden = hidden.has(d.url);
     if (hiddenOnly.on && !isHidden) return false;
     if (!hiddenOnly.on && isHidden) return false;
+    if (doneOnly.on && !isDone) return false;
     if (heldOnly.on && !isHeld && !isDone && !isHidden) return false;
     // Review-flagged possible over-demotions always stay visible (C2):
     // the review queue exists so a human sees them.
@@ -383,7 +386,7 @@ function render() {
     { key: 'watch', label: '🌱 On the radar', sub: 'Worth watching, not ready to pitch', cls: 'watch' },
     { key: 'retired', label: '🗄 Retired', sub: 'Older than ' + RETIRE_DAYS + ' days, not worked. Pin to keep', cls: 'retired' },
     { key: 'hidden', label: '❌ Passed', sub: 'Not a fit. Dismissed, can restore', cls: 'hidden' },
-    { key: 'done', label: '✉️ Contacted', sub: 'Leads you have worked, progress archive', cls: 'done' },
+    { key: 'done', label: '✉️ Contacted', sub: 'Marked contacted — not emailed, just filed here. Click ✉️ again to restore', cls: 'done' },
   ];
 
   defs.forEach(def => {
@@ -434,7 +437,7 @@ function render() {
         holdBtn.title = 'Interested. Follow up when ready';
         holdBtn.addEventListener('click', (ev) => { ev.stopPropagation(); toggleHeld(d.url); });
         const doneBtn = el('button', 'mini-btn done' + (isDone ? ' on' : ''), '✉️');
-        doneBtn.title = 'Contacted. Worked this lead';
+        doneBtn.title = 'Mark contacted (does NOT email). Moves card to the Contacted section. Click again to undo.';
         doneBtn.addEventListener('click', (ev) => { ev.stopPropagation(); toggleDone(d.url); });
         const hideBtn = el('button', 'mini-btn hide' + (isHidden ? ' on' : ''), '❌');
         hideBtn.title = 'Pass. Not a fit, can restore';
@@ -553,6 +556,11 @@ document.getElementById('bNew').addEventListener('click', () => {
 document.getElementById('bHeld').addEventListener('click', () => {
   heldOnly.on = !heldOnly.on;
   document.getElementById('bHeld').classList.toggle('active', heldOnly.on);
+  render();
+});
+document.getElementById('bDone').addEventListener('click', () => {
+  doneOnly.on = !doneOnly.on;
+  document.getElementById('bDone').classList.toggle('active', doneOnly.on);
   render();
 });
 document.getElementById('bHidden').addEventListener('click', () => {
